@@ -6,7 +6,7 @@ FORMAT = "utf-8"
 DISCONNECT_MESSAGE = "!disconnect"
 
 PORT = 5050
-SERVER = "127.0.0.1"# socket.gethostbyname(socket.gethostname())  # 192.168.4.113
+SERVER = socket.gethostbyname(socket.gethostname())  # 192.168.4.113
 ADDR = SERVER, PORT
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -98,7 +98,7 @@ def startCommands():
         connect()
 
 # print(f"Starting server on host: {SERVER}, port {PORT}")
-# SERVER = input("What server do you want to run on?\n")
+SERVER = input("What server do you want to run on?\n")
 PORT = int(input("What port do you want to run on?\n"))
 # start()
 threadStart = threading.Thread(target=start, args=(SERVER, PORT))
