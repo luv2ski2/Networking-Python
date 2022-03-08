@@ -35,7 +35,7 @@ def handleClient(conn, addr):
 
 def handleSend(conn):
     while True:
-        sendMsg = input()
+        sendMsg = input(">")
         send(sendMsg, conn)
         if sendMsg == DISCONNECT_MESSAGE:
             break
@@ -53,7 +53,7 @@ def handleConnection(conn):
             if msg == DISCONNECT_MESSAGE:
                 connected = False
 
-            print(f"{msg}\n")
+            print(f"{conn.getsockname()}> {msg}\n")
             # conn.send("Message received".encode(FORMAT))
 
     conn.close()
@@ -71,7 +71,7 @@ def send(msg, conn):
 def connect():
     connecter = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serv = input("Who do you want to connect with?\n")
-    port = int(input("What port do you want to connect to?"))
+    port = int(input("What port do you want to connect to?\n"))
     addr = serv, port
     print(addr)
     connecter.connect(addr)
@@ -82,15 +82,16 @@ def connect():
 def start(server, port):
     addr = server, port
     s.bind(addr)
-    print(f"[Starting on {port} {server}")
+    print(s.getsockname())
+    print(f"[Starting] on {port} {server}\n")
     s.listen()
-    print("[Listening]")
+    print("[Listening]\n")
     while True:
         conn, addr = s.accept()
         thread = threading.Thread(target=handleConnection, args=(conn,))
         # Open connection
         thread.start()
-        print(f"\nACTIVE CONNECTIONS: {threading.activeCount() - 1}\n")
+        print(f"[NEW CONNECTION] from {addr}\n")
 
 def startCommands():
     answr = input("What do you want to do?\n1. Connect to another system")
