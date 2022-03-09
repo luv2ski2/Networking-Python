@@ -57,7 +57,8 @@ def handleConnection(conn: socket.socket):
             if msg == DISCONNECT_MESSAGE:
                 connected = False
 
-            print(f"{conn.getsockname()}> {msg}\n")
+            print(conn.getsockname()[0] + ">" + msg + "\n")
+            # print(f"{conn.getsockname()}> {msg}\n")
             # conn.send("Message received".encode(FORMAT))
 
     conn.close()
@@ -87,7 +88,8 @@ def start(server: str, port: int):
     addr = server, port
     s.bind(addr)
     print(s.getsockname())
-    print(f"[Starting] on {port} {server}\n")
+    print("[Starting] on " + server + " "+ str(port))
+    # print(f"[Starting] on {port} {server}\n")
     s.listen()
     print("[Listening]\n")
     while True:
@@ -95,7 +97,8 @@ def start(server: str, port: int):
         thread = threading.Thread(target=handleConnection, args=(conn,))
         # Open connection
         thread.start()
-        print(f"[NEW CONNECTION] from {addr}\n")
+        print("[New Connection]")
+        # print(f"[NEW CONNECTION] from {addr}\n")
 
 def startCommands():
     # global connections
