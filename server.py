@@ -9,29 +9,32 @@ PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())  # 192.168.4.113
 ADDR = SERVER, PORT
 
+# all active connections
+connections = []
+
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # s.bind(ADDR)
 
-def handleClient(conn, addr):
-    # print(f"[NEW CONNECTION] {addr} has connected.")
-    sendThread = threading.Thread(target=handleSend, args=(conn,))
-    sendThread.start()
-
-    connected = True
-    while connected:
-        msgLen = conn.recv(HEADER).decode(FORMAT)
-        if msgLen:
-            msgLen = int(msgLen)
-            msg = conn.recv(msgLen).decode(FORMAT)
-            if msg == DISCONNECT_MESSAGE:
-                connected = False
-
-            print(f"{msg} from {addr}\n")
-            conn.send("Message received".encode(FORMAT))
-
-    conn.close()
-    sendThread.join()
+# def handleClient(conn, addr):
+#     # print(f"[NEW CONNECTION] {addr} has connected.")
+#     sendThread = threading.Thread(target=handleSend, args=(conn,))
+#     sendThread.start()
+#
+#     connected = True
+#     while connected:
+#         msgLen = conn.recv(HEADER).decode(FORMAT)
+#         if msgLen:
+#             msgLen = int(msgLen)
+#             msg = conn.recv(msgLen).decode(FORMAT)
+#             if msg == DISCONNECT_MESSAGE:
+#                 connected = False
+#
+#             print(f"{msg} from {addr}\n")
+#             conn.send("Message received".encode(FORMAT))
+#
+#     conn.close()
+#     sendThread.join()
 
 def handleSend(conn):
     while True:
@@ -40,9 +43,10 @@ def handleSend(conn):
         if sendMsg == DISCONNECT_MESSAGE:
             break
 
-def handleConnection(conn):
-    sendThread = threading.Thread(target=handleSend, args=(conn,))
-    sendThread.start()
+def handleConnection(conn: socket.socket):
+    # sendThread = threading.Thread(target=handleSend, args=(conn,))
+    # sendThread.start()
+    connections.append(conn)
 
     connected = True
     while connected:
@@ -57,9 +61,9 @@ def handleConnection(conn):
             # conn.send("Message received".encode(FORMAT))
 
     conn.close()
-    sendThread.join()
+    # sendThread.join()
 
-def send(msg, conn):
+def send(msg: str, conn: socket.socket):
     message = msg.encode(FORMAT)
     messageLen = len(message)
     sendLen = str(messageLen).encode(FORMAT)
@@ -79,7 +83,7 @@ def connect():
     thread.start()
 
 # Listening
-def start(server, port):
+def start(server: str, port: int):
     addr = server, port
     s.bind(addr)
     print(s.getsockname())
@@ -94,9 +98,26 @@ def start(server, port):
         print(f"[NEW CONNECTION] from {addr}\n")
 
 def startCommands():
-    answr = input("What do you want to do?\n1. Connect to another system")
-    if answr == "1":
-        connect()
+    global connections
+    print("What do you want to do? Type help for a list of commands")
+    while True:
+        answr = input()
+        if answr[0:4] == "send":
+            toSend = answr[4:]
+            for conn in connections:
+                send(toSend, conn)
+            if toSend == DISCONNECT_MESSAGE:
+                for conn in connections:
+                    conn.close()
+                connections = []
+                break
+
+        if answr == "connect":
+            connect()
+
+        if answr == "help":
+            print("Commands:\nsend [message]: sends a message\nconnect: connects you to another system")
+
 
 # print(f"Starting server on host: {SERVER}, port {PORT}")
 SERVER = input("What server do you want to run on?\n")
